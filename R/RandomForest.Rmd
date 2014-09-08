@@ -1,0 +1,42 @@
+---
+title: "Random Forest"
+output: html_document
+---
+
+We can use 'rf' method to generate a radmon tree model. Tuning Parameters: mtry (#Randomly Selected Predictors)
+```{r}
+data(iris)
+library(ggplot2)
+library(caret)
+inTrain <- createDataPartition(iris$Species, p=0.7, list=F)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+modFit <- train(Species~., data=training, method='rf', prox=T)
+modFit
+```
+
+We can get a single tree by using
+```{r}
+getTree(modFit$finalModel,labelVar = T)
+```
+
+We can use classCenter to get each class of the iris(3 class in total)'s center point.(类别质心)
+```{r}
+irisP <- classCenter(training[, c(3,4)], training$Species, modFit$finalModel$proximity)
+irisP <- as.data.frame(irisP)
+irisP$Species <- rownames(irisP)
+p <- qplot(Petal.Width, Petal.Length, col=Species, data=training)
+p + geom_point(aes(x=Petal.Width, y=Petal.Length, col=Species), size=5, shape=4, data=irisP)
+```
+
+Then we can predict new values using the random trees model
+```{r}
+pred <- predict(modFit, testing);
+testing$PredRight <- pred==testing$Species
+table(pred, testing$Species)
+```
+
+We can even see which point our prediction is wrong.
+```{r}
+qplot(Petal.Width, Petal.Length, colour=PredRight, data=testing, main='new data predictions')
+```

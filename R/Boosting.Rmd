@@ -1,0 +1,20 @@
+---
+title: "Boosting"
+output: html_document
+---
+
+```{r}
+library(ISLR)
+library(ggplot2)
+library(caret)
+data(Wage)
+Wage <- subset(Wage, select=-c(logwage))
+inTrain <- createDataPartition(y=Wage$wage, p=0.7, list=F)
+training <- Wage[inTrain,]
+testing <- Wage[-inTrain,]
+# using Generalized Boosted Regression Modeling
+modFit <- train(wage~., method='gbm', data=training, verbose=F)
+
+predictions <- predict(modFit, testing)
+qplot(predictions, wage, data= testing)
+```
